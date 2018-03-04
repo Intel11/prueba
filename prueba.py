@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 # version 0.0.2
 
+import base64
+
 from core import httptools
 from core import scrapertools
 from core import servertools
@@ -11,12 +13,49 @@ from platformcode import config,logger,platformtools
 def mainlist(item):
     logger.info()
     itemlist = list()
-    itemlist.append(Item(channel=item.channel, action = "canal2", title ="Frecuencia Latina"))
-    itemlist.append(Item(channel=item.channel, action = "canal4", title ="América TV"))
-    itemlist.append(Item(channel=item.channel, action = "canal5", title ="Panamericana Televisión"))
-    itemlist.append(Item(channel=item.channel, action = "canal7", title ="TV Perú"))
-    itemlist.append(Item(channel=item.channel, action = "canal9", title ="ATV"))
+    itemlist.append(Item(channel=item.channel, title = "Perú", text_bold = True))
+    itemlist.append(Item(channel=item.channel, action = "canal2", title ="  Frecuencia Latina"))
+    itemlist.append(Item(channel=item.channel, action = "canal4", title ="  América TV"))
+    itemlist.append(Item(channel=item.channel, action = "canal5", title ="  Panamericana Televisión"))
+    itemlist.append(Item(channel=item.channel, action = "canal7", title ="  TV Perú"))
+    itemlist.append(Item(channel=item.channel, action = "canal9", title ="  ATV"))
+    itemlist.append(Item(channel=item.channel))
+    itemlist.append(Item(channel=item.channel, title = "Argentina", text_bold = True))
+    itemlist.append(Item(channel=item.channel, action = "canala1", title ="  América TV"))
+    itemlist.append(Item(channel=item.channel, action = "canala26", title ="  Canal 26"))
     return itemlist
+
+
+def canal26(item):
+    logger.info()
+    itemlist = []
+    url_channel = "http://television-internet.com.ar/canal-26.html"
+    data = httptools.downloadpage(url_channel).data
+    url_stream = scrapertools.find_single_match(data, '<iframe id.*?src="([^"]+)')
+    data = httptools.downloadpage(url_stream).data
+    url_stream = scrapertools.find_single_match(data, '<iframe src="([^"]+)')
+    data = httptools.downloadpage(url_stream).data
+    encode = scrapertools.find_single_match(data, 'atob\("([^"]+)"')
+    decode = base64.b64decode(encode)
+    item.url = scrapertools.find_single_match(decode, 'appPlaylist":"([^"]+)"')
+    item.url += "|Referer=%s" %url_stream #http://vmf.edge-apps.net/embed/live.php?streamname=americahls-100056&autoplay=true"
+    platformtools.play_video(item)
+
+
+def canala1(item):
+    logger.info()
+    itemlist = []
+    url_channel = "http://television-internet.com.ar/america-tv.html"
+    data = httptools.downloadpage(url_channel).data
+    url_stream = scrapertools.find_single_match(data, '<iframe id.*?src="([^"]+)')
+    data = httptools.downloadpage(url_stream).data
+    url_stream = scrapertools.find_single_match(data, '<iframe src="([^"]+)')
+    data = httptools.downloadpage(url_stream).data
+    encode = scrapertools.find_single_match(data, 'atob\("([^"]+)"')
+    decode = base64.b64decode(encode)
+    item.url = scrapertools.find_single_match(decode, 'appPlaylist":"([^"]+)"')
+    item.url += "|Referer=%s" %url_stream #http://vmf.edge-apps.net/embed/live.php?streamname=americahls-100056&autoplay=true"
+    platformtools.play_video(item)
 
     
 def canal2(item):
@@ -34,8 +73,10 @@ def canal2(item):
     data = httptools.downloadpage(url_stream, headers=headers).data
     url = scrapertools.find_single_match(data, 'var urlchannel = "([^"]+)"')
     url = httptools.downloadpage(url, follow_redirects=False, only_headers=True, headers=headers1).headers.get("location", "")
-    hh = scrapertools.find_single_match(url, "(.*?)/load")
+    hh = scrapertools.find_single_match(url, "http://(.*?)/load")
+    data = httptools.downloadpage(url, headers = headers1).data
     item.url = url + "|Referer=%s&Host=%s" %(url_stream, hh)
+    item.url = item.url.replace("playlist","chunks")
     platformtools.play_video(item)
 
 
