@@ -23,22 +23,36 @@ def mainlist(item):
     itemlist.append(Item(channel=item.channel, title = "Argentina", text_bold = True))
     itemlist.append(Item(channel=item.channel, action = "canala1", title ="  América TV"))
     itemlist.append(Item(channel=item.channel, action = "canala26", title ="  Canal 26"))
+    itemlist.append(Item(channel=item.channel, action = "canala9", title ="  Canal 9"))
+    itemlist.append(Item(channel=item.channel, action = "canalatelefe", title ="  Telefe"))
     return itemlist
 
 
-def canal26(item):
+def canalatelefe(item):
+    logger.info()
+    itemlist = []
+    url_channel = "http://www.televisionparatodos.tv/telefe-reproductor/"
+    data = httptools.downloadpage(url_channel).data
+    item.url = scrapertools.find_single_match(data, '<source src="([^"]+)')
+    platformtools.play_video(item)
+
+
+def canala9(item):
+    logger.info()
+    itemlist = []
+    url_channel = "http://www.televisionparatodos.tv/canal-9-player/"
+    data = httptools.downloadpage(url_channel).data
+    item.url = scrapertools.find_single_match(data, '<iframe id=.*?src="([^"]+)')
+    data = httptools.downloadpage(item.url).data
+    item.url = scrapertools.find_single_match(data, "file: '([^']+)")
+    platformtools.play_video(item)
+
+
+def canala26(item):
     logger.info()
     itemlist = []
     url_channel = "http://television-internet.com.ar/canal-26.html"
-    data = httptools.downloadpage(url_channel).data
-    url_stream = scrapertools.find_single_match(data, '<iframe id.*?src="([^"]+)')
-    data = httptools.downloadpage(url_stream).data
-    url_stream = scrapertools.find_single_match(data, '<iframe src="([^"]+)')
-    data = httptools.downloadpage(url_stream).data
-    encode = scrapertools.find_single_match(data, 'atob\("([^"]+)"')
-    decode = base64.b64decode(encode)
-    item.url = scrapertools.find_single_match(decode, 'appPlaylist":"([^"]+)"')
-    item.url += "|Referer=%s" %url_stream #http://vmf.edge-apps.net/embed/live.php?streamname=americahls-100056&autoplay=true"
+    item.url = "http://live-edge01.telecentro.net.ar/live/smil:c26.smil/master.m3u8"
     platformtools.play_video(item)
 
 
@@ -74,7 +88,6 @@ def canal2(item):
     url = scrapertools.find_single_match(data, 'var urlchannel = "([^"]+)"')
     url = httptools.downloadpage(url, follow_redirects=False, only_headers=True, headers=headers1).headers.get("location", "")
     hh = scrapertools.find_single_match(url, "http://(.*?)/load")
-    data = httptools.downloadpage(url, headers = headers1).data
     item.url = url + "|Referer=%s&Host=%s" %(url_stream, hh)
     item.url = item.url.replace("playlist","chunks")
     platformtools.play_video(item)
