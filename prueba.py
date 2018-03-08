@@ -8,6 +8,8 @@ from core import scrapertools
 from core import scrapertoolsV2
 from core import servertools
 from core.item import Item
+from lib import jsunpack
+from lib.pyaes import openssl_aes
 from platformcode import config,logger,platformtools
 
 
@@ -31,12 +33,73 @@ def mainlist(item):
     itemlist.append(Item(channel=item.channel, action = "canalf1_1",  title ="  Formula 1"))
     itemlist.append(Item(channel=item.channel, action = "canalf1_2",  title ="  Formula 1 Op2"))
     itemlist.append(Item(channel=item.channel, action = "canaltoros", title ="  Toros"))
-    itemlist.append(Item(channel=item.channel, action = "canalfox_sport1", title ="  Fox Sport 1 Latino"))
+    itemlist.append(Item(channel=item.channel, action = "canalfox_sport1", title ="  Fox Sport 1"))
     itemlist.append(Item(channel=item.channel))
     itemlist.append(Item(channel=item.channel, title = "Internacional", text_bold = True))
     itemlist.append(Item(channel=item.channel, action = "canalantena3_1",  title ="  Antena 3"))
     itemlist.append(Item(channel=item.channel, action = "canalantena3_2",  title ="  Antena 3 Op2"))
+    itemlist.append(Item(channel=item.channel, action = "canalhistory",  title ="  History Channel - Castellano"))
+    itemlist.append(Item(channel=item.channel, action = "canalhistory2",  title ="  History Channel - Latino"))
+    itemlist.append(Item(channel=item.channel, action = "canalhh",  title ="  H&H Discovery"))
+    itemlist.append(Item(channel=item.channel, action = "canaldiscovery",  title ="  Discovery Channel - Latino"))
+    itemlist.append(Item(channel=item.channel, action = "canaldiscoveryhd",  title ="  Discovery Channel - Latino HD"))
     return itemlist
+
+    
+def canaldiscoveryhd(item):
+    logger.info()
+    item.url = provider_lw("http://embed.latino-webtv.com/channels/discovery.html")
+    platformtools.play_video(item)
+
+
+def canalhh(item):
+    logger.info()
+    item.url = provider_lw("http://embed.latino-webtv.com/channels/homeandhealt.html")
+    platformtools.play_video(item)
+
+
+def canalhistory2(item):
+    logger.info()
+    url_source = "http://www.sintelevisor.com"
+    url_channel = "http://www.tv-en-vivo.org/history/"
+    data = httptools.downloadpage(url_channel).data
+    url = scrapertools.find_single_match(data, 'source: "([^"]+)"')
+    host = scrapertoolsV2.get_domain_from_url(url)
+    url = url.replace("index.m3u8","Stream(05)/index.m3u8")
+    item.url  = url + "|Referer=%s" %url
+    item.url += "&Host=%s" %host
+    item.url += "&User-Agent=Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.132 Safari/537.36"
+    headers = [
+    ["Referer", url],
+    ["Host", host]
+    ]
+    data = httptools.downloadpage(url, headers = headers).data
+    platformtools.play_video(item)
+
+
+def canaldiscovery(item):
+    logger.info()
+    item.url = server_playerfs("http://tvpor-internet.com/discovery-latino-en-vivo.html")
+    platformtools.play_video(item)
+
+
+def canalhistory2(item):
+    logger.info()
+    url_source = "http://www.tutv-gratis.com"
+    url_channel = "http://www.tv-en-vivo.org/history/"
+    data = httptools.downloadpage(url_channel).data
+    url = scrapertools.find_single_match(data, 'source: "([^"]+)"')
+    host = scrapertoolsV2.get_domain_from_url(url)
+    url = url.replace("index.m3u8","Stream(05)/index.m3u8")
+    item.url  = url + "|Referer=%s" %url
+    item.url += "&Host=%s" %host
+    item.url += "&User-Agent=Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.132 Safari/537.36"
+    headers = [
+    ["Referer", url],
+    ["Host", host]
+    ]
+    data = httptools.downloadpage(url, headers = headers).data
+    platformtools.play_video(item)
 
 
 def canalantena3_2(item):
@@ -71,31 +134,7 @@ def canalf1_1(item):
 
 def canalf1_2(item):
     logger.info()
-    url_channel = "http://www.vercanalestv.com/ver-formula-1-en-directo-y-online-gratis/"
-    data = httptools.downloadpage(url_channel).data
-    url = scrapertools.find_single_match(data, '<iframe scrolling="no".*?src="([^"]+)"')
-    headers = [
-    ["Referer", url_channel]
-    ]
-    data = httptools.downloadpage(url, headers = headers).data
-    url = scrapertools.find_single_match(data, '<a href="([^"]+)"')
-    url1 = "http://" + scrapertoolsV2.get_domain_from_url(url_channel) + url
-    headers1 = [
-    ["Referer", url1],
-    ["Host", scrapertoolsV2.get_domain_from_url(url_channel)]
-    ]
-    data = httptools.downloadpage(url1, headers = headers1).data
-    url = scrapertools.find_single_match(data, '<iframe scrolling.*?src="([^"]+)"')
-    headers2 = [
-    ["Referer", url1],
-    ["Host", scrapertoolsV2.get_domain_from_url(url)]
-    ]
-    data = httptools.downloadpage(url, headers = headers2).data
-    item.url = scrapertools.find_single_match(data, "source: '([^']+)'")
-    host = scrapertoolsV2.get_domain_from_url(item.url)
-    item.url += "|Referer=%s" %url
-    item.url += "&Host=%s" %host
-    item.url += "&User-Agent=Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.132 Safari/537.36"
+    item.url = provider_vercanalestv("http://www.vercanalestv.com/ver-formula-1-en-directo-y-online-gratis/")
     platformtools.play_video(item)
 
 
@@ -179,7 +218,60 @@ def canal9(item):
     platformtools.play_video(item)
 
 
+def canalhistory(item):
+    logger.info()
+    item.url = provider_vercanalestv("http://www.vercanalestv.com/ver-canal-historia-en-directo-y-gratis-en-vivo/")
+    platformtools.play_video(item)
+
+
 ### PROVEEDORES
+def provider_lw(url_channel):
+    opensslkey = "sha256"
+    headers = [
+    ["Referer", url_channel]
+    ]
+    data = httptools.downloadpage(url_channel, headers = headers).data
+    mm = scrapertools.find_single_match(data, 'MarioCSdecrypt.dec\("(.*?)"\)')
+    OpenSSL_AES = openssl_aes.AESCipher()
+    url = OpenSSL_AES.decrypt(mm, opensslkey)
+    dd = httptools.downloadpage(url, headers = headers).data
+    url = scrapertools.find_single_match(dd, "(?s)1280x720.*?(http.*?)#").strip()
+    return url
+
+
+def provider_vercanalestv(url_channel):
+    logger.info()
+    data = httptools.downloadpage(url_channel).data
+    url = scrapertools.find_single_match(data, '<iframe scrolling="no".*?src="([^"]+)"')
+    headers = [
+    ["Referer", url_channel]
+    ]
+    data = httptools.downloadpage(url, headers = headers).data
+    url = scrapertools.find_single_match(data, '<a href="([^"]+)"')
+    url1 = "http://" + scrapertoolsV2.get_domain_from_url(url_channel) + url
+    headers1 = [
+    ["Referer", url1],
+    ["Host", scrapertoolsV2.get_domain_from_url(url_channel)]
+    ]
+    if "javascript" in url:
+        url = scrapertools.find_single_match(data, '<iframe scrolling.*?src="([^"]+)"')
+        data = httptools.downloadpage(url).data
+        url1 = scrapertools.find_single_match(data, '<iframe scrolling.*?src="([^"]+)"')
+        headers1 = []
+    data = httptools.downloadpage(url1, headers = headers1).data
+    url = scrapertools.find_single_match(data, '<iframe scrolling.*?src="([^"]+)"')
+    headers2 = [
+    ["Referer", url1],
+    ["Host", scrapertoolsV2.get_domain_from_url(url)]
+    ]
+    data = httptools.downloadpage(url, headers = headers2).data
+    url = scrapertools.find_single_match(data, "source: '([^']+)'")
+    host = scrapertoolsV2.get_domain_from_url(url)
+    url += "|Referer=%s" %url
+    url += "&Host=%s" %host
+    url += "&User-Agent=Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.132 Safari/537.36"
+    return url
+
 
 def provider_verplusonline(url_channel):
     logger.info()
@@ -234,7 +326,7 @@ def server_pxstream(url_channel):
 
 
 def server_playerfs(url_channel):
-    #playerfs / ucaster
+    #playerfs / ucaster / janjuaplayer
     logger.info()
     data = httptools.downloadpage(url_channel).data
     bloque = scrapertools.find_single_match(data, "<script type='text.*?src='.*?'")
@@ -243,16 +335,15 @@ def server_playerfs(url_channel):
     channel = scrapertools.find_single_match(bloque, "channel='(\w+)'")
     g = scrapertools.find_single_match(bloque, "g='(\w+)'")
     xserver = scrapertools.find_single_match(bloque, "src='([^']+)'")
-    h_stream = "http://www.playerfs.com/membedplayer/"
-    h_loadbalanceer = "http://www.pubfstream.com:1935/loadbalancer"
-    if "ucaster" in xserver:
-        h_stream = "http://www.ucasterplayer.com/membedplayer/"
-    h_loadbalanceer = "http://www.pubucaster.com:1935/loadbalancer"
+    data = httptools.downloadpage(xserver).data
+    h_stream = scrapertools.find_single_match(data, "<iframe.*?src=(.*?height\+')")
+    h_stream = h_stream.replace("'+embedded+'","membedplayer").replace("'+channel+'",channel).replace("'+g+'",g).replace("'+width+'",width).replace("'+height+'",height)
     headers = [
     ["Referer", url_channel]
     ]
-    data = httptools.downloadpage(h_stream + "%s/%s/%s/%s" %(channel, g, width, height), headers=headers).data
-    ip_balancer = httptools.downloadpage(h_loadbalanceer).data.split('=')[1]
+    data = httptools.downloadpage(h_stream, headers=headers).data
+    h_loadbalancer = scrapertools.find_single_match(data, 'url: "([^"]+)')
+    ip_balancer = httptools.downloadpage(h_loadbalancer).data.split('=')[1]
     url = scrapertools.find_single_match(data, '"src", "([^\)]+)')
     if "ucaster" in xserver:
         url = scrapertools.find_single_match(data, 'hlsUrl = "([^;]+)')
