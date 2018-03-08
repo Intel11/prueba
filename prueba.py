@@ -8,7 +8,6 @@ from core import scrapertools
 from core import scrapertoolsV2
 from core import servertools
 from core.item import Item
-from lib import jsunpack
 from lib.pyaes import openssl_aes
 from platformcode import config,logger,platformtools
 
@@ -16,70 +15,137 @@ from platformcode import config,logger,platformtools
 def mainlist(item):
     logger.info()
     itemlist = list()
-    itemlist.append(Item(channel=item.channel, title = "Perú", text_bold = True))
+    itemlist.append(Item(channel=item.channel, title = "[COLOR green]Perú[/COLOR]", text_bold = True))
     itemlist.append(Item(channel=item.channel, action = "canal2", title ="  Frecuencia Latina"))
     itemlist.append(Item(channel=item.channel, action = "canal4", title ="  América TV"))
     itemlist.append(Item(channel=item.channel, action = "canal5", title ="  Panamericana Televisión"))
     itemlist.append(Item(channel=item.channel, action = "canal7", title ="  TV Perú"))
     itemlist.append(Item(channel=item.channel, action = "canal9", title ="  ATV"))
     itemlist.append(Item(channel=item.channel))
-    itemlist.append(Item(channel=item.channel, title = "Argentina", text_bold = True))
+    itemlist.append(Item(channel=item.channel, title = "[COLOR green]Argentina[/COLOR]", text_bold = True))
     itemlist.append(Item(channel=item.channel, action = "canala1",      title ="  América TV"))
     itemlist.append(Item(channel=item.channel, action = "canala9",      title ="  Canal 9"))
     itemlist.append(Item(channel=item.channel, action = "canalatelefe", title ="  Telefe"))
     itemlist.append(Item(channel=item.channel, action = "canala26",     title ="  Canal 26"))
     itemlist.append(Item(channel=item.channel))
-    itemlist.append(Item(channel=item.channel, title = "Deportes", text_bold = True))
-    itemlist.append(Item(channel=item.channel, action = "canalf1_1",  title ="  Formula 1"))
-    itemlist.append(Item(channel=item.channel, action = "canalf1_2",  title ="  Formula 1 Op2"))
-    itemlist.append(Item(channel=item.channel, action = "canaltoros", title ="  Toros"))
+    itemlist.append(Item(channel=item.channel, title = "[COLOR green]Deportes[/COLOR]", text_bold = True))
+    itemlist.append(Item(channel=item.channel, action = "canalespnmas",    title ="  ESPN+ HD"))
+    itemlist.append(Item(channel=item.channel, action = "canalespn1",      title ="  ESPN 1 HD"))
+    itemlist.append(Item(channel=item.channel, action = "canalespn2",      title ="  ESPN 2 HD"))
     itemlist.append(Item(channel=item.channel, action = "canalfox_sport1", title ="  Fox Sport 1"))
+    itemlist.append(Item(channel=item.channel, action = "canalfoxsporthd", title ="  Fox Sport HD"))
+    itemlist.append(Item(channel=item.channel, action = "canalfoxsport2",  title ="  Fox Sport 2 HD"))
+    itemlist.append(Item(channel=item.channel, action = "canalf1_1",       title ="  Formula 1"))
+    itemlist.append(Item(channel=item.channel, action = "canalf1_2",       title ="  Formula 1 Op2"))
+    itemlist.append(Item(channel=item.channel, action = "canaltoros",      title ="  Toros"))
+    itemlist.append(Item(channel=item.channel, action = "canaltoros2",     title ="  Toros Op2"))
     itemlist.append(Item(channel=item.channel))
-    itemlist.append(Item(channel=item.channel, title = "Internacional", text_bold = True))
-    itemlist.append(Item(channel=item.channel, action = "canalantena3_1",  title ="  Antena 3"))
-    itemlist.append(Item(channel=item.channel, action = "canalantena3_2",  title ="  Antena 3 Op2"))
-    itemlist.append(Item(channel=item.channel, action = "canalhistory",  title ="  History Channel - Castellano"))
-    itemlist.append(Item(channel=item.channel, action = "canalhistory2",  title ="  History Channel - Latino"))
-    itemlist.append(Item(channel=item.channel, action = "canalhh",  title ="  H&H Discovery"))
-    itemlist.append(Item(channel=item.channel, action = "canaldiscovery",  title ="  Discovery Channel - Latino"))
-    itemlist.append(Item(channel=item.channel, action = "canaldiscoveryhd",  title ="  Discovery Channel - Latino HD"))
+    itemlist.append(Item(channel=item.channel, title = "[COLOR green]Internacional[/COLOR]", text_bold = True))
+    itemlist.append(Item(channel=item.channel, action = "canalantena3_1",   title = "  Antena 3"))
+    itemlist.append(Item(channel=item.channel, action = "canalantena3_2",   title = "  Antena 3 Op2"))
+    itemlist.append(Item(channel=item.channel, action = "canalhistory",     title = "  History Channel - Castellano"))
+    itemlist.append(Item(channel=item.channel, action = "canalhistory2",    title = "  History Channel - Latino", HD=False))
+    itemlist.append(Item(channel=item.channel, action = "canalhistory2",    title = "  History Channel HD- Latino", HD=True))
+    itemlist.append(Item(channel=item.channel, action = "canaldiscovery",   title = "  Discovery Channel - Latino"))
+    itemlist.append(Item(channel=item.channel, action = "canaldiscoveryhd", title = "  Discovery Channel - Latino HD"))
+    itemlist.append(Item(channel=item.channel, action = "canalfox",         title = "  Fox - Latino", res = "832x468"))
+    itemlist.append(Item(channel=item.channel, action = "canalfox",         title = "  Fox - Latino HD"))
+    itemlist.append(Item(channel=item.channel, action = "canalhh",          title = "  H&H Discovery HD"))
+    itemlist.append(Item(channel=item.channel, action = "canale",           title = "  E!"))
+    itemlist.append(Item(channel=item.channel, action = "canaldiscoveryk",  title = "  Discovery Kids - HD"))
     return itemlist
 
-    
-def canaldiscoveryhd(item):
+
+def canalfoxsport2(item):
     logger.info()
-    item.url = provider_lw("http://embed.latino-webtv.com/channels/discovery.html")
+    url_source = "http://latino-webtv.com/Fox-Sports-2-en-vivo/"
+    item.url = provider_lw("http://embed.latino-webtv.com/channels/foxsports2.html", res = item.res)
     platformtools.play_video(item)
 
 
-def canalhh(item):
+def canalespn1(item):
     logger.info()
-    item.url = provider_lw("http://embed.latino-webtv.com/channels/homeandhealt.html")
+    url_source = "http://latino-webtv.com/ESPN-en-vivo/"
+    item.url = provider_lw("http://embed.latino-webtv.com/channels/espn.html", res = item.res)
     platformtools.play_video(item)
 
 
-def canalhistory2(item):
+def canalfoxsporthd(item):
     logger.info()
-    url_source = "http://www.sintelevisor.com"
-    url_channel = "http://www.tv-en-vivo.org/history/"
+    url_source = "http://latino-webtv.com/Fox-Sports-en-vivo/"
+    item.url = provider_lw("http://embed.latino-webtv.com/channels/foxsports.html", res = item.res)
+    platformtools.play_video(item)
+
+
+def canalespn2(item):
+    logger.info()
+    url_source = "http://latino-webtv.com/ESPN-2-en-vivo/"
+    item.url = provider_lw("http://embed.latino-webtv.com/channels/espn2.html", res = item.res)
+    platformtools.play_video(item)
+
+
+def canalespnmas(item):
+    logger.info()
+    url_source = "http://latino-webtv.com/ESPN-Plus-en-vivo/"
+    item.url = provider_lw("http://embed.latino-webtv.com/channels/espn_plus.html", res = item.res)
+    platformtools.play_video(item)
+
+
+def canaltoros2(item):
+    logger.info()
+    url_source = "http://latelete.tv/canal-plus-toros-en-directo-gratis-por-internet/"
+    url_channel = "http://verdirectotv.com/tv/digitales2/plustoros.html"
     data = httptools.downloadpage(url_channel).data
-    url = scrapertools.find_single_match(data, 'source: "([^"]+)"')
+    url = scrapertools.find_single_match(data, '<iframe scrolling.*?src="([^"]+)')
+    headers = [
+    ["Referer", url_channel],
+    ["host", scrapertoolsV2.get_domain_from_url(url)],
+    ]
+    data = httptools.downloadpage(url, headers = headers).data
+    url = scrapertools.find_single_match(data, "source: '([^']+)")
     host = scrapertoolsV2.get_domain_from_url(url)
-    url = url.replace("index.m3u8","Stream(05)/index.m3u8")
     item.url  = url + "|Referer=%s" %url
     item.url += "&Host=%s" %host
     item.url += "&User-Agent=Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.132 Safari/537.36"
-    headers = [
-    ["Referer", url],
-    ["Host", host]
-    ]
-    data = httptools.downloadpage(url, headers = headers).data
+    platformtools.play_video(item)
+
+
+def canaldiscoveryk(item):
+    logger.info()
+    url_source = "http://latino-webtv.com/Discovery-Kids-en-vivo/"
+    item.url = provider_lw("http://embed.latino-webtv.com/channels/discoveryk.html", res = item.res)
+    platformtools.play_video(item)
+
+
+def canale(item):
+    logger.info()
+    url_source = "http://latino-webtv.com/E-en-vivo/"
+    item.url = provider_lw("http://embed.latino-webtv.com/channels/e.html", res = item.res)
+    platformtools.play_video(item)
+
+
+def canalfox(item):
+    logger.info()
+    url_source = "http://latino-webtv.com/FOX-en-vivo/"
+    item.url = provider_lw("http://embed.latino-webtv.com/channels/fox.html", res = item.res)
+    platformtools.play_video(item)
+
+
+def canaldiscoveryhd(item):
+    logger.info()
+    item.url = provider_lw("http://embed.latino-webtv.com/channels/discovery.html", res = item.res)
     platformtools.play_video(item)
 
 
 def canaldiscovery(item):
     logger.info()
     item.url = server_playerfs("http://tvpor-internet.com/discovery-latino-en-vivo.html")
+    platformtools.play_video(item)
+
+
+def canalhh(item):
+    logger.info()
+    item.url = provider_lw("http://embed.latino-webtv.com/channels/homeandhealt.html", res = item.res)
     platformtools.play_video(item)
 
 
@@ -90,7 +156,11 @@ def canalhistory2(item):
     data = httptools.downloadpage(url_channel).data
     url = scrapertools.find_single_match(data, 'source: "([^"]+)"')
     host = scrapertoolsV2.get_domain_from_url(url)
-    url = url.replace("index.m3u8","Stream(05)/index.m3u8")
+    if item.HD==True:
+        quality='05'
+    else:
+        quality='02'
+    url = url.replace("index.m3u8","Stream(%s)/index.m3u8" % quality)
     item.url  = url + "|Referer=%s" %url
     item.url += "&Host=%s" %host
     item.url += "&User-Agent=Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.132 Safari/537.36"
@@ -98,7 +168,6 @@ def canalhistory2(item):
     ["Referer", url],
     ["Host", host]
     ]
-    data = httptools.downloadpage(url, headers = headers).data
     platformtools.play_video(item)
 
 
@@ -225,17 +294,25 @@ def canalhistory(item):
 
 
 ### PROVEEDORES
-def provider_lw(url_channel):
-    opensslkey = "sha256"
+def provider_lw(url_channel, res):
+    # RESOLUCION POR DEFECTO: HD
+    if not res:
+        res = "1280x720"
+    key = "sha256"
     headers = [
     ["Referer", url_channel]
     ]
-    data = httptools.downloadpage(url_channel, headers = headers).data
+    uu1 = httptools.downloadpage(url_channel, follow_redirects=False, only_headers=True, headers=headers).headers.get("location", "")
+    uu = httptools.downloadpage(uu1, headers = headers).data
+    url = "http://" + scrapertoolsV2.get_domain_from_url(uu1) + scrapertools.find_single_match(uu, 'location = "([^"]+)')
+    data = httptools.downloadpage(url, headers = headers).data
     mm = scrapertools.find_single_match(data, 'MarioCSdecrypt.dec\("(.*?)"\)')
     OpenSSL_AES = openssl_aes.AESCipher()
-    url = OpenSSL_AES.decrypt(mm, opensslkey)
-    dd = httptools.downloadpage(url, headers = headers).data
-    url = scrapertools.find_single_match(dd, "(?s)1280x720.*?(http.*?)#").strip()
+    url1 = OpenSSL_AES.decrypt(mm, key)
+    dd = httptools.downloadpage(url1, headers = headers).data
+    url = scrapertools.find_single_match(dd, "(?s)%s.*?(http.*?)#" %res).strip()
+    if url == "":
+        url = url1
     return url
 
 
@@ -282,14 +359,14 @@ def provider_verplusonline(url_channel):
     ]
     data = httptools.downloadpage(url, headers = headers).data
     bloque = scrapertools.find_single_match(data, "<script type='text.*?src=.*?</script>")
-    url = scrapertools.find_single_match(bloque, "src='([^']+)")
-    file = scrapertools.find_single_match(bloque, "file='([^']+)")
+    url    = scrapertools.find_single_match(bloque, "src='([^']+)")
+    file   = scrapertools.find_single_match(bloque, "file='([^']+)")
     height = scrapertools.find_single_match(bloque, "height='([^']+)")
-    width = scrapertools.find_single_match(bloque, "width='([^']+)")
+    width  = scrapertools.find_single_match(bloque, "width='([^']+)")
     data = httptools.downloadpage(url).data
-    url = scrapertools.find_single_match(data, "src=(.*?)>")
+    url  = scrapertools.find_single_match(data, "src=(.*?)>")
     url = url.replace("'+file+'",file).replace("'+width+'",width).replace("'+height+'",height)
-    data = httptools.downloadpage(url).data
+    data   = httptools.downloadpage(url).data
     url = scrapertools.find_single_match(data, "source: '([^']+)'")
     url += "|User-Agent=Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.186 Safari/537.36"
     return url
@@ -328,14 +405,14 @@ def server_pxstream(url_channel):
 def server_playerfs(url_channel):
     #playerfs / ucaster / janjuaplayer
     logger.info()
-    data = httptools.downloadpage(url_channel).data
-    bloque = scrapertools.find_single_match(data, "<script type='text.*?src='.*?'")
-    width = scrapertools.find_single_match(bloque, 'width=(\w+)')
-    height = scrapertools.find_single_match(bloque, 'height=(\w+)')
+    data    = httptools.downloadpage(url_channel).data
+    bloque  = scrapertools.find_single_match(data,   "<script type='text.*?src='.*?'")
+    width   = scrapertools.find_single_match(bloque, 'width=(\w+)')
+    height  = scrapertools.find_single_match(bloque, 'height=(\w+)')
     channel = scrapertools.find_single_match(bloque, "channel='(\w+)'")
-    g = scrapertools.find_single_match(bloque, "g='(\w+)'")
+    g       = scrapertools.find_single_match(bloque, "g='(\w+)'")
     xserver = scrapertools.find_single_match(bloque, "src='([^']+)'")
-    data = httptools.downloadpage(xserver).data
+    data    = httptools.downloadpage(xserver).data
     h_stream = scrapertools.find_single_match(data, "<iframe.*?src=(.*?height\+')")
     h_stream = h_stream.replace("'+embedded+'","membedplayer").replace("'+channel+'",channel).replace("'+g+'",g).replace("'+width+'",width).replace("'+height+'",height)
     headers = [
