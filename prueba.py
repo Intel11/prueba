@@ -20,6 +20,7 @@ def mainlist(item):
     itemlist.append(Item(channel=item.channel, action = "canal4", title ="  América TV"))
     itemlist.append(Item(channel=item.channel, action = "canal5", title ="  Panamericana Televisión"))
     itemlist.append(Item(channel=item.channel, action = "canal7", title ="  TV Perú"))
+    itemlist.append(Item(channel=item.channel, action = "canaln", title ="  Canal N"))
     itemlist.append(Item(channel=item.channel, action = "canal9", title ="  ATV"))
     itemlist.append(Item(channel=item.channel))
     itemlist.append(Item(channel=item.channel, title = "[COLOR green]Argentina[/COLOR]", text_bold = True))
@@ -32,9 +33,11 @@ def mainlist(item):
     itemlist.append(Item(channel=item.channel, action = "canalespnmas",    title ="  ESPN+ HD"))
     itemlist.append(Item(channel=item.channel, action = "canalespn1",      title ="  ESPN 1 HD"))
     itemlist.append(Item(channel=item.channel, action = "canalespn2",      title ="  ESPN 2 HD"))
+    itemlist.append(Item(channel=item.channel, action = "canalespn3",      title ="  ESPN 3 HD"))
     itemlist.append(Item(channel=item.channel, action = "canalfox_sport1", title ="  Fox Sport 1"))
-    itemlist.append(Item(channel=item.channel, action = "canalfoxsporthd", title ="  Fox Sport HD"))
+    itemlist.append(Item(channel=item.channel, action = "canalfoxsporthd", title ="  Fox Sport 1 HD"))
     itemlist.append(Item(channel=item.channel, action = "canalfoxsport2",  title ="  Fox Sport 2 HD"))
+    itemlist.append(Item(channel=item.channel, action = "canalfoxsport3",  title ="  Fox Sport 3 HD"))
     itemlist.append(Item(channel=item.channel, action = "canalf1_1",       title ="  Formula 1"))
     itemlist.append(Item(channel=item.channel, action = "canalf1_2",       title ="  Formula 1 Op2"))
     itemlist.append(Item(channel=item.channel, action = "canaltoros",      title ="  Toros"))
@@ -48,18 +51,90 @@ def mainlist(item):
     itemlist.append(Item(channel=item.channel, action = "canalhistory2",    title = "  History Channel HD- Latino", HD=True))
     itemlist.append(Item(channel=item.channel, action = "canaldiscovery",   title = "  Discovery Channel - Latino"))
     itemlist.append(Item(channel=item.channel, action = "canaldiscoveryhd", title = "  Discovery Channel - Latino HD"))
+    itemlist.append(Item(channel=item.channel, action = "canalnatgeo",      title = "  National Geographic - HD"))
     itemlist.append(Item(channel=item.channel, action = "canalfox",         title = "  Fox - Latino", res = "832x468"))
     itemlist.append(Item(channel=item.channel, action = "canalfox",         title = "  Fox - Latino HD"))
     itemlist.append(Item(channel=item.channel, action = "canalhh",          title = "  H&H Discovery HD"))
     itemlist.append(Item(channel=item.channel, action = "canale",           title = "  E!"))
-    itemlist.append(Item(channel=item.channel, action = "canaldiscoveryk",  title = "  Discovery Kids - HD"))
+    itemlist.append(Item(channel=item.channel))
+    itemlist.append(Item(channel=item.channel, title = "[COLOR green]Infantiles[/COLOR]", text_bold = True))
+    itemlist.append(Item(channel=item.channel, action = "canalcartoon",    title = "  Cartoon Network - HD"))
+    itemlist.append(Item(channel=item.channel, action = "canaldiscoveryk", title = "  Discovery Kids - HD"))
+    itemlist.append(Item(channel=item.channel, action = "canaldisney",     title = "  Disney Channel - HD"))
+    itemlist.append(Item(channel=item.channel, action = "canaldisneyxd",   title = "  Disney XD"))
+    itemlist.append(Item(channel=item.channel, action = "canalnick",       title = "  Nick - HD"))
+    itemlist.append(Item(channel=item.channel, action = "canalnicktoons",  title = "  Nicktoons"))
+    itemlist.append(Item(channel=item.channel, action = "canaltooncast",   title = "  Tooncast"))
     return itemlist
+
+
+def canaltooncast(item):
+    logger.info()
+    url_source = "http://latino-webtv.com/Tooncast-en-vivo/"
+    item.url = provider_lw("http://embed.latino-webtv.com/channels/tooncast.html", res = item.res)
+    platformtools.play_video(item)
+
+
+def canalnicktoons(item):
+    logger.info()
+    url_source = "http://latino-webtv.com/Nicktoons-en-vivo/"
+    item.url = provider_lw("http://embed.latino-webtv.com/channels/nicktoons.html", res = item.res)
+    platformtools.play_video(item)
+
+
+def canaldisneyxd(item):
+    logger.info()
+    url_source = "http://latino-webtv.com/Disney-XD-en-vivo/"
+    item.url = provider_lw("http://embed.latino-webtv.com/channels/disneyxd.html", res = item.res)
+    platformtools.play_video(item)
+
+
+def canalnick(item):
+    logger.info()
+    url_source = "http://latino-webtv.com/Nick-HD-en-vivo/"
+    item.url = provider_lw("http://embed.latino-webtv.com/channels/nick.html", res = item.res)
+    platformtools.play_video(item)
+
+
+def canalcartoon(item):
+    logger.info()
+    url_source = "http://latino-webtv.com/Cartoon-Network-en-vivo/"
+    item.url = provider_lw("http://embed.latino-webtv.com/channels/cartoon.html", res = item.res)
+    platformtools.play_video(item)
+
+
+def canalnatgeo(item):
+    logger.info()
+    url_source = "http://latino-webtv.com/Nat-Geo-en-vivo/"
+    item.url = provider_lw("http://embed.latino-webtv.com/channels/natgeo.html", res = item.res)
+    platformtools.play_video(item)
+
+
+def canaldisney(item):
+    logger.info()
+    url_source = "http://www.fulltelevisionhd.net/2014/09/disney-channel-en-vivo-por-internet.html"
+    item.url = provider_lw("http://embed.latino-webtv.com/channels/disneych.html", res = item.res)
+    platformtools.play_video(item)
+
+
+def canaln(item):
+    logger.info()
+    url_source = "http://www.fulltelevisionhd.net/2013/02/canal-n-en-vivo-por-internet.html"
+    item.url = server_playerfs("http://www.fulltvhd.fi/peru/canaln.php")
+    platformtools.play_video(item)
 
 
 def canalfoxsport2(item):
     logger.info()
     url_source = "http://latino-webtv.com/Fox-Sports-2-en-vivo/"
     item.url = provider_lw("http://embed.latino-webtv.com/channels/foxsports2.html", res = item.res)
+    platformtools.play_video(item)
+
+
+def canalfoxsport3(item):
+    logger.info()
+    url_source = "http://latino-webtv.com/Fox-Sports-3-en-vivo/"
+    item.url = provider_lw("http://embed.latino-webtv.com/channels/Fox-Sports-3.html", res = item.res)
     platformtools.play_video(item)
 
 
@@ -81,6 +156,13 @@ def canalespn2(item):
     logger.info()
     url_source = "http://latino-webtv.com/ESPN-2-en-vivo/"
     item.url = provider_lw("http://embed.latino-webtv.com/channels/espn2.html", res = item.res)
+    platformtools.play_video(item)
+
+
+def canalespn3(item):
+    logger.info()
+    url_source = "http://latino-webtv.com/ESPN-3-en-vivo/"
+    item.url = provider_lw("http://embed.latino-webtv.com/channels/espn3.html", res = item.res)
     platformtools.play_video(item)
 
 
@@ -253,7 +335,10 @@ def canala1(item):
     
 def canal2(item):
     logger.info()
-    item.url = server_playerfs("http://canalesenvivo.ucoz.com/Frecuencia_Latina.html")
+    #url_source = "http://visionperuanatv.com/2013/03/frecuencia-latina-en-vivo.html"
+    url_source = "http://www.fulltelevisionhd.net/2013/02/frecuencia-latina-en-vivo-por-internet.html"
+    #item.url = server_pxstream("http://canalesenvivo.ucoz.com/Frecuencia_Latina.html")
+    item.url = server_playerfs("http://fulltvhd.fi/peru/latina.php")
     platformtools.play_video(item)
 
 
@@ -403,7 +488,7 @@ def server_pxstream(url_channel):
 
 
 def server_playerfs(url_channel):
-    #playerfs / ucaster / janjuaplayer
+    #playerfs / ucaster / janjuaplayer / zony
     logger.info()
     data    = httptools.downloadpage(url_channel).data
     bloque  = scrapertools.find_single_match(data,   "<script type='text.*?src='.*?'")
