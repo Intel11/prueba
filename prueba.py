@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# version 0.0.4
+# version 0.0.5
 
 import base64
 
@@ -56,6 +56,7 @@ def mainlist(item):
     itemlist.append(Item(channel=item.channel, action = "canalfox",         title = "  Fox - Latino HD"))
     itemlist.append(Item(channel=item.channel, action = "canalhh",          title = "  H&H Discovery HD"))
     itemlist.append(Item(channel=item.channel, action = "canale",           title = "  E!"))
+    itemlist.append(Item(channel=item.channel, action = "canalhbo",         title = "  HBO - HD"))
     itemlist.append(Item(channel=item.channel))
     itemlist.append(Item(channel=item.channel, title = "[COLOR green]Infantiles[/COLOR]", text_bold = True))
     itemlist.append(Item(channel=item.channel, action = "canalcartoon",    title = "  Cartoon Network - HD"))
@@ -66,6 +67,13 @@ def mainlist(item):
     itemlist.append(Item(channel=item.channel, action = "canalnicktoons",  title = "  Nicktoons"))
     itemlist.append(Item(channel=item.channel, action = "canaltooncast",   title = "  Tooncast"))
     return itemlist
+
+
+def canalhbo(item):
+    logger.info()
+    url_source = "http://latino-webtv.com/HBO-en-vivo/"
+    item.url = provider_lw("http://embed.latino-webtv.com/channels/hbo.html", res = item.res)
+    platformtools.play_video(item)
 
 
 def canaltooncast(item):
@@ -188,7 +196,7 @@ def canaltoros2(item):
     host = scrapertoolsV2.get_domain_from_url(url)
     item.url  = url + "|Referer=%s" %url
     item.url += "&Host=%s" %host
-    item.url += "&User-Agent=Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.132 Safari/537.36"
+    item.url += "&User-Agent=Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3239.132 Safari/537.36"
     platformtools.play_video(item)
 
 
@@ -245,7 +253,7 @@ def canalhistory2(item):
     url = url.replace("index.m3u8","Stream(%s)/index.m3u8" % quality)
     item.url  = url + "|Referer=%s" %url
     item.url += "&Host=%s" %host
-    item.url += "&User-Agent=Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.132 Safari/537.36"
+    item.url += "&User-Agent=Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3239.132 Safari/537.36"
     headers = [
     ["Referer", url],
     ["Host", host]
@@ -407,11 +415,11 @@ def provider_lw(url_channel, res):
 def provider_vercanalestv(url_channel):
     logger.info()
     data = httptools.downloadpage(url_channel).data
-    url = scrapertools.find_single_match(data, '<iframe scrolling="no".*?src="([^"]+)"')
+    urlx = scrapertools.find_single_match(data, '<iframe scrolling="no".*?src="([^"]+)"')
     headers = [
     ["Referer", url_channel]
     ]
-    data = httptools.downloadpage(url, headers = headers).data
+    data = httptools.downloadpage(urlx, headers = headers).data
     url = scrapertools.find_single_match(data, '<a href="([^"]+)"')
     url1 = "http://" + scrapertoolsV2.get_domain_from_url(url_channel) + url
     headers1 = [
@@ -420,21 +428,31 @@ def provider_vercanalestv(url_channel):
     ]
     if "javascript" in url:
         url = scrapertools.find_single_match(data, '<iframe scrolling.*?src="([^"]+)"')
-        data = httptools.downloadpage(url).data
-        url1 = scrapertools.find_single_match(data, '<iframe scrolling.*?src="([^"]+)"')
-        headers1 = []
+        if "vergol" in url:
+            url1 = url
+            headers1 = [
+            ["Referer", urlx],
+            ["Host", scrapertoolsV2.get_domain_from_url(url1)]
+            ]
+        else:
+            data = httptools.downloadpage(url).data
+            url1 = scrapertools.find_single_match(data, '<iframe scrolling.*?src="([^"]+)"')
+            headers1 = []
     data = httptools.downloadpage(url1, headers = headers1).data
-    url = scrapertools.find_single_match(data, '<iframe scrolling.*?src="([^"]+)"')
-    headers2 = [
-    ["Referer", url1],
-    ["Host", scrapertoolsV2.get_domain_from_url(url)]
-    ]
-    data = httptools.downloadpage(url, headers = headers2).data
+    patron = "source: '([^']+)'"
     url = scrapertools.find_single_match(data, "source: '([^']+)'")
+    if url == "":
+        url = scrapertools.find_single_match(data, '<iframe scrolling.*?src="([^"]+)"')
+        headers2 = [
+        ["Referer", url1],
+        ["Host", scrapertoolsV2.get_domain_from_url(url)]
+        ]
+        data = httptools.downloadpage(url, headers = headers2).data
+    url = scrapertools.find_single_match(data, patron)
     host = scrapertoolsV2.get_domain_from_url(url)
     url += "|Referer=%s" %url
     url += "&Host=%s" %host
-    url += "&User-Agent=Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.132 Safari/537.36"
+    url += "&User-Agent=Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3239.132 Safari/537.36"
     return url
 
 
@@ -511,8 +529,9 @@ def server_playerfs(url_channel):
     ip_balancer = httptools.downloadpage(h_loadbalancer).data.split('=')[1]
     url = scrapertools.find_single_match(data, '"src", "([^\)]+)')
     if "ucaster" in xserver:
-        url = scrapertools.find_single_match(data, 'hlsUrl = "([^;]+)')
+        url1 = scrapertools.find_single_match(data, 'hlsUrl = "([^;]+)')
         pk = scrapertools.find_single_match(data, 'hlsUrl = hlsUrl \+ \("([^")]+)"')
-        url += pk
+        if pk != "":
+            url = url1 + pk
     url = url.replace('" + ea + "', ip_balancer).replace('"',"")
     return url
