@@ -353,6 +353,8 @@ def canal2(item):
 def canal4(item):
     logger.info()
     item.url = server_playerfs("http://tvenvivo.online/americatreve.php")
+    if not item.url:
+        item.url = server_pxstream("http://tvenvivo.online/americatreve.php")
     platformtools.play_video(item)
 
 
@@ -526,7 +528,10 @@ def server_playerfs(url_channel):
     ]
     data = httptools.downloadpage(h_stream, headers=headers).data
     h_loadbalancer = scrapertools.find_single_match(data, 'url: "([^"]+)')
-    ip_balancer = httptools.downloadpage(h_loadbalancer).data.split('=')[1]
+    try:
+        ip_balancer = httptools.downloadpage(h_loadbalancer).data.split('=')[1]
+    except:
+        return ""
     url = scrapertools.find_single_match(data, '"src", "([^\)]+)')
     if "ucaster" in xserver:
         url1 = scrapertools.find_single_match(data, 'hlsUrl = "([^;]+)')
