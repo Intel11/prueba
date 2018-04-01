@@ -11,6 +11,8 @@ from core.item import Item
 from lib.pyaes import openssl_aes
 from platformcode import config,logger,platformtools
 
+_useragent = "Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3163.100 Safari/537.36"
+
 
 def mainlist(item):
     logger.info()
@@ -196,7 +198,7 @@ def canaltoros2(item):
     host = scrapertoolsV2.get_domain_from_url(url)
     item.url  = url + "|Referer=%s" %url
     item.url += "&Host=%s" %host
-    item.url += "&User-Agent=Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3239.132 Safari/537.36"
+    item.url += "&User-Agent=%s" %_useragent
     platformtools.play_video(item)
 
 
@@ -253,7 +255,7 @@ def canalhistory2(item):
     url = url.replace("index.m3u8","Stream(%s)/index.m3u8" % quality)
     item.url  = url + "|Referer=%s" %url
     item.url += "&Host=%s" %host
-    item.url += "&User-Agent=Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3239.132 Safari/537.36"
+    item.url += "&User-Agent=%s" %_useragent
     headers = [
     ["Referer", url],
     ["Host", host]
@@ -411,6 +413,7 @@ def provider_lw(url_channel, res):
     url = scrapertools.find_single_match(dd, "(?s)%s.*?(http.*?)#" %res).strip()
     if url == "":
         url = url1
+    url += "|User-Agent=%s" %_useragent
     return url
 
 
@@ -454,29 +457,36 @@ def provider_vercanalestv(url_channel):
     host = scrapertoolsV2.get_domain_from_url(url)
     url += "|Referer=%s" %url
     url += "&Host=%s" %host
-    url += "&User-Agent=Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3239.132 Safari/537.36"
+    url += "&User-Agent=%s" %_useragent
     return url
 
 
 def provider_verplusonline(url_channel):
     logger.info()
     data = httptools.downloadpage(url_channel).data
-    url = scrapertools.find_single_match(data, '<iframe.*?src="([^"]+)"')
+    urlx = scrapertools.find_single_match(data, '<iframe.*?src="([^"]+)"')
     headers = [
     ["Referer", url_channel]
     ]
-    data = httptools.downloadpage(url, headers = headers).data
+    data = httptools.downloadpage(urlx, headers = headers).data
     bloque = scrapertools.find_single_match(data, "<script type='text.*?src=.*?</script>")
-    url    = scrapertools.find_single_match(bloque, "src='([^']+)")
-    file   = scrapertools.find_single_match(bloque, "file='([^']+)")
-    height = scrapertools.find_single_match(bloque, "height='([^']+)")
-    width  = scrapertools.find_single_match(bloque, "width='([^']+)")
-    data = httptools.downloadpage(url).data
-    url  = scrapertools.find_single_match(data, "src=(.*?)>")
-    url = url.replace("'+file+'",file).replace("'+width+'",width).replace("'+height+'",height)
-    data   = httptools.downloadpage(url).data
+    if bloque:
+        url    = scrapertools.find_single_match(bloque, "src='([^']+)")
+        file   = scrapertools.find_single_match(bloque, "file='([^']+)")
+        height = scrapertools.find_single_match(bloque, "height='([^']+)")
+        width  = scrapertools.find_single_match(bloque, "width='([^']+)")
+        data = httptools.downloadpage(url).data
+        url  = scrapertools.find_single_match(data, "src=(.*?)>")
+        url = url.replace("'+file+'",file).replace("'+width+'",width).replace("'+height+'",height)
+        data = httptools.downloadpage(url).data
+    else:
+        url = scrapertools.find_single_match(data, '<iframe scrolling.*?src="([^"]+)')
+        headers = [
+        ["Referer", urlx]
+        ]
+        data = httptools.downloadpage(url, headers = headers).data
     url = scrapertools.find_single_match(data, "source: '([^']+)'")
-    url += "|User-Agent=Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.186 Safari/537.36"
+    url += "|User-Agent=%s "%_useragent
     return url
 
 
@@ -540,3 +550,4 @@ def server_playerfs(url_channel):
             url = url1 + pk
     url = url.replace('" + ea + "', ip_balancer).replace('"',"")
     return url
+    
