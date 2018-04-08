@@ -402,7 +402,7 @@ def provider_lw(url_channel, res):
     uu1 = httptools.downloadpage(url_channel, follow_redirects=False, only_headers=True, headers=headers).headers.get("location", "")
     uu = httptools.downloadpage(uu1, headers = headers).data
     url = "http://" + scrapertoolsV2.get_domain_from_url(uu1) + "/" + scrapertools.find_single_match(uu, 'location = "([^"]+)')
-    if url == "http://":
+    if url == "http://" or url == "http://tvcanales.cf/":
         data = httptools.downloadpage(url_channel, headers = headers).data
     else:
         data = httptools.downloadpage(url, headers = headers).data
