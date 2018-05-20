@@ -11,19 +11,20 @@ from core.item import Item
 from lib.pyaes import openssl_aes
 from platformcode import config,logger,platformtools
 
-_useragent = "Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3163.100 Safari/537.36"
+_useragent = "Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko) Chrome/66.0.3163.100 Safari/537.36"
 
 
 def mainlist(item):
     logger.info()
     itemlist = list()
     itemlist.append(Item(channel=item.channel, title = "[COLOR green]Perú[/COLOR]", text_bold = True))
-    itemlist.append(Item(channel=item.channel, action = "canal2", title ="  Frecuencia Latina"))
-    itemlist.append(Item(channel=item.channel, action = "canal4", title ="  América TV"))
-    itemlist.append(Item(channel=item.channel, action = "canal5", title ="  Panamericana Televisión"))
-    itemlist.append(Item(channel=item.channel, action = "canal7", title ="  TV Perú"))
-    itemlist.append(Item(channel=item.channel, action = "canaln", title ="  Canal N"))
-    itemlist.append(Item(channel=item.channel, action = "canal9", title ="  ATV"))
+    itemlist.append(Item(channel=item.channel, action = "canal2",   title ="  Frecuencia Latina"))
+    itemlist.append(Item(channel=item.channel, action = "canal4",   title ="  América TV"))
+    itemlist.append(Item(channel=item.channel, action = "canal5",   title ="  Panamericana Televisión"))
+    itemlist.append(Item(channel=item.channel, action = "canal5_2", title ="  Panamericana Televisión Op2"))
+    itemlist.append(Item(channel=item.channel, action = "canal7",   title ="  TV Perú"))
+    itemlist.append(Item(channel=item.channel, action = "canaln",   title ="  Canal N"))
+    itemlist.append(Item(channel=item.channel, action = "canal9",   title ="  ATV"))
     itemlist.append(Item(channel=item.channel))
     itemlist.append(Item(channel=item.channel, title = "[COLOR green]Argentina[/COLOR]", text_bold = True))
     itemlist.append(Item(channel=item.channel, action = "canala1",      title ="  América TV"))
@@ -362,7 +363,15 @@ def canal4(item):
 
 def canal5(item):
     logger.info()
-    item.url = server_iblubs("http://cdnh4.iblups.com/hls/ptv2.m3u8")
+    data = httptools.downloadpage("https://panamericana.pe/tvenvivo/hd").data
+    item.url = server_iblubs(scrapertools.find_single_match(data, '<iframe src="([^"]+)'))
+    platformtools.play_video(item)
+
+def canal5_2(item):
+    logger.info()
+    data = httptools.downloadpage("https://panamericana.pe/tvenvivo/sd").data
+    item.url = scrapertools.find_single_match(data, '<iframe frameborder.*?src="([^"]+)')
+    item.server = "dailymotion"
     platformtools.play_video(item)
 
 
@@ -498,6 +507,7 @@ def server_iblubs(url_channel):
     if "hls" not in url_channel:
         data = httptools.downloadpage(url_channel).data
         url = scrapertools.find_single_match(data, 'file: "(http[^"]+)"')
+    url += "|User-Agent=%s" %_useragent
     return url
 
 
@@ -517,6 +527,7 @@ def server_pxstream(url_channel):
     hh = scrapertoolsV2.get_domain_from_url(url)
     url = url + "|Referer=%s&Host=%s" %(url_stream, hh)
     url = url.replace("playlist","chunks")
+    url += "&User-Agent=%s" %_useragent
     return url
 
 
