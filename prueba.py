@@ -9,6 +9,7 @@ from core import scrapertoolsV2
 from core import servertools
 from core.item import Item
 from lib.pyaes import openssl_aes
+from lib import jsunpack
 from platformcode import config,logger,platformtools
 
 _useragent = "Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko) Chrome/66.0.3163.100 Safari/537.36"
@@ -22,7 +23,8 @@ def mainlist(item):
     itemlist.append(Item(channel=item.channel, action = "canal4",   title ="  América TV"))
     itemlist.append(Item(channel=item.channel, action = "canal5",   title ="  Panamericana Televisión"))
     itemlist.append(Item(channel=item.channel, action = "canal5_2", title ="  Panamericana Televisión Op2"))
-    itemlist.append(Item(channel=item.channel, action = "canal7",   title ="  TV Perú"))
+    itemlist.append(Item(channel=item.channel, action = "canal7_hd",title ="  TV Perú HD"))
+    itemlist.append(Item(channel=item.channel, action = "canal7_73",title ="  TV Perú 7.3"))
     itemlist.append(Item(channel=item.channel, action = "canaln",   title ="  Canal N"))
     itemlist.append(Item(channel=item.channel, action = "canal9",   title ="  ATV"))
     itemlist.append(Item(channel=item.channel))
@@ -131,7 +133,7 @@ def canaldisney(item):
 def canaln(item):
     logger.info()
     url_source = "http://www.fulltelevisionhd.net/2013/02/canal-n-en-vivo-por-internet.html"
-    item.url = server_playerfs("http://www.fulltvhd.fi/peru/canaln.php")
+    item.url = server_whostreams("http://www.fulltvhd.fi/peru/canaln.php")
     platformtools.play_video(item)
 
 
@@ -349,15 +351,18 @@ def canal2(item):
     #url_source = "http://visionperuanatv.com/2013/03/frecuencia-latina-en-vivo.html"
     url_source = "http://www.fulltelevisionhd.net/2013/02/frecuencia-latina-en-vivo-por-internet.html"
     #item.url = server_pxstream("http://canalesenvivo.ucoz.com/Frecuencia_Latina.html")
-    item.url = server_playerfs("http://fulltvhd.fi/peru/latina.php")
+    item.url = server_whostreams("http://fulltvhd.fi/peru/latina.php")
     platformtools.play_video(item)
 
 
 def canal4(item):
     logger.info()
-    item.url = server_playerfs("http://tvenvivo.online/americatreve.php")
-    if not item.url:
-        item.url = server_pxstream("http://tvenvivo.online/americatreve.php")
+    #url_source = "http://visionperuanatv.com/2013/03/frecuencia-latina-en-vivo.html"
+    # item.url = server_playerfs("http://tvenvivo.online/americatreve.php")
+    # if not item.url:
+        # item.url = server_pxstream("http://tvenvivo.online/americatreve.php")
+    url_source = "http://www.fulltelevisionhd.li/america-television-en-vivo-por-internet/"
+    item.url = server_whostreams("http://www.fulltvhd.fi/peru/america.php")
     platformtools.play_video(item)
 
 
@@ -375,9 +380,15 @@ def canal5_2(item):
     platformtools.play_video(item)
 
 
-def canal7(item):
+def canal7_73(item):
     logger.info()
-    item.url = server_iblubs("http://p.iblups.com/tvperu/embed.php")
+    item.url = server_iblubs("http://iblups.com/e_tvperu73")
+    platformtools.play_video(item)
+
+
+def canal7_hd(item):
+    logger.info()
+    item.url = server_iblubs("http://iblups.com/e_tvperuhd")
     platformtools.play_video(item)
 
 
@@ -404,7 +415,6 @@ def provider_lw(url_channel, res):
     # RESOLUCION POR DEFECTO: HD
     if not res:
         res = "1280x720"
-    key = "sha256"
     headers = [
     ["Referer", url_channel]
     ]
@@ -415,15 +425,19 @@ def provider_lw(url_channel, res):
         data = httptools.downloadpage(url_channel, headers = headers).data
     else:
         data = httptools.downloadpage(url, headers = headers).data
+    headers = {'Referer':url}
+    data_c = httptools.downloadpage("http://tvcanales.cf/jquery.js", headers = headers).data
+    key = scrapertools.find_single_match(data_c, "decode','slice','([^']+)")
     mm = scrapertools.find_single_match(data, 'MarioCSdecrypt.dec\("(.*?)"\)')
     OpenSSL_AES = openssl_aes.AESCipher()
     url1 = OpenSSL_AES.decrypt(mm, key)
     dd = httptools.downloadpage(url1, headers = headers).data
-    url = scrapertools.find_single_match(dd, "(?s)%s.*?(http.*?)#" %res).strip()
-    if url == "":
-        url = url1
-    url += "|User-Agent=%s" %_useragent
-    return url
+    url_f = scrapertools.find_single_match(dd, "(?s)%s.*?(http.*?)#" %res).strip()
+    if url_f == "":
+        url_f = url1
+    url_f += "|User-Agent=%s" %_useragent
+    url_f += "&Referer=%s" %url
+    return url_f
 
 
 def provider_vercanalestv(url_channel):
@@ -504,8 +518,11 @@ def provider_verplusonline(url_channel):
 def server_iblubs(url_channel):
     logger.info()
     url = url_channel
+    headers = [
+    ["Referer", url_channel]
+    ]
     if "hls" not in url_channel:
-        data = httptools.downloadpage(url_channel).data
+        data = httptools.downloadpage(url_channel, headers = headers).data
         url = scrapertools.find_single_match(data, 'file: "(http[^"]+)"')
     url += "|User-Agent=%s" %_useragent
     return url
@@ -562,3 +579,18 @@ def server_playerfs(url_channel):
     url = url.replace('" + ea + "', ip_balancer).replace('"',"")
     return url
     
+
+def server_whostreams(url_channel):
+    logger.info()
+    data = httptools.downloadpage(url_channel).data
+    url_stream = scrapertools.find_single_match(data, '<iframe src="([^"]+)"')
+    headers = [
+    ["Referer", url_channel],
+    ["Host", "whostreams.net"]
+    ]
+    data = httptools.downloadpage(url_stream, headers=headers).data
+    pack = scrapertools.find_single_match(data, "p,a,c,k,e,d\)(.*)</script")
+    unpack = jsunpack.unpack(pack)
+    url = scrapertools.find_single_match(unpack, 'file:"([^"]+)')
+    url += "|User-Agent=%s" %_useragent
+    return url
