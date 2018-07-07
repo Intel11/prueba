@@ -43,6 +43,7 @@ def mainlist(item):
     itemlist.append(Item(channel=item.channel, action = "canalfoxsporthd", title ="  Fox Sport 1 HD"))
     itemlist.append(Item(channel=item.channel, action = "canalfoxsport2",  title ="  Fox Sport 2 HD"))
     itemlist.append(Item(channel=item.channel, action = "canalfoxsport3",  title ="  Fox Sport 3 HD"))
+    #itemlist.append(Item(channel=item.channel, action = "canalroja",       title ="  Roja directa"))
     itemlist.append(Item(channel=item.channel, action = "canalf1_1",       title ="  Formula 1"))
     itemlist.append(Item(channel=item.channel, action = "canalf1_2",       title ="  Formula 1 Op2"))
     itemlist.append(Item(channel=item.channel, action = "canaltoros",      title ="  Toros"))
@@ -72,6 +73,13 @@ def mainlist(item):
     itemlist.append(Item(channel=item.channel, action = "canalnicktoons",  title = "  Nicktoons"))
     itemlist.append(Item(channel=item.channel, action = "canaltooncast",   title = "  Tooncast"))
     return itemlist
+
+
+def canalroja(item):
+    logger.info()
+    url_source = "http://www.tutv-gratis.com/2017/11/roja-directa-tv-en-vivo.html"
+    item.url = server_telerium("http://tutv-gratishd.blogspot.com/2017/11/roja-directa.html")
+    platformtools.play_video(item)
 
 
 def canalhbo(item):
@@ -591,6 +599,25 @@ def server_whostreams(url_channel):
     data = httptools.downloadpage(url_stream, headers=headers).data
     pack = scrapertools.find_single_match(data, "p,a,c,k,e,d\)(.*)</script")
     unpack = jsunpack.unpack(pack)
+    url = scrapertools.find_single_match(unpack, 'file:"([^"]+)')
+    url += "|User-Agent=%s" %_useragent
+    return url
+
+
+def server_telerium(url_channel):
+    logger.info()
+    data = httptools.downloadpage(url_channel).data
+    url_stream = scrapertools.find_single_match(data, '<iframe.*?src="([^"]+)"')
+    headers = [
+    ["Referer", url_channel],
+    ["Host", "telerium.tv"]
+    ]
+    data = httptools.downloadpage(url_stream, headers=headers).data
+    logger.info("Intel11 %s" %data)
+    pack = scrapertools.find_single_match(data, "p,a,c,k,e,d\)(.*)</script")
+    unpack = jsunpack.unpack(pack)
+    logger.info("Intel22 %s" %pack)
+    logger.info("Intel33 %s" %unpack)
     url = scrapertools.find_single_match(unpack, 'file:"([^"]+)')
     url += "|User-Agent=%s" %_useragent
     return url
