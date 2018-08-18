@@ -141,7 +141,7 @@ def canaldisney(item):
 def canaln(item):
     logger.info()
     url_source = "http://www.fulltelevisionhd.net/2013/02/canal-n-en-vivo-por-internet.html"
-    item.url = server_whostreams("http://www.fulltvhd.fi/peru/canaln.php")
+    item.url = server_playerfs("http://www.fulltvhd.fi/peru/canaln.php")
     platformtools.play_video(item)
 
 
@@ -300,13 +300,15 @@ def canaltoros(item):
 
 def canalf1_1(item):
     logger.info()
-    item.url = provider_verplusonline("http://verplusonline.com/ver-movistar-f1-online/")
+    #item.url = provider_verplusonline("http://verplusonline.com/ver-movistar-f1-online/")
+    item.url = provider_verplusonline("http://verbeinlaliga.com/movistar-formula-uno/")
     platformtools.play_video(item)
     
 
 def canalf1_2(item):
     logger.info()
-    item.url = provider_vercanalestv("http://www.vercanalestv.com/ver-formula-1-en-directo-y-online-gratis/")
+    #item.url = provider_vercanalestv("http://www.vercanalestv.com/ver-formula-1-en-directo-y-online-gratis/")
+    item.url = server_telerium("http://vertelevision.tv/tv/deportes/formula1.php")
     platformtools.play_video(item)
 
 
@@ -359,7 +361,7 @@ def canal2(item):
     #url_source = "http://visionperuanatv.com/2013/03/frecuencia-latina-en-vivo.html"
     url_source = "http://www.fulltelevisionhd.net/2013/02/frecuencia-latina-en-vivo-por-internet.html"
     #item.url = server_pxstream("http://canalesenvivo.ucoz.com/Frecuencia_Latina.html")
-    item.url = server_whostreams("http://fulltvhd.fi/peru/latina.php")
+    item.url = server_playerfs("http://fulltvhd.fi/peru/latina.php")
     platformtools.play_video(item)
 
 
@@ -370,7 +372,7 @@ def canal4(item):
     # if not item.url:
         # item.url = server_pxstream("http://tvenvivo.online/americatreve.php")
     url_source = "http://www.fulltelevisionhd.li/america-television-en-vivo-por-internet/"
-    item.url = server_whostreams("http://www.fulltvhd.fi/peru/america.php")
+    item.url = server_playerfs("http://www.fulltvhd.fi/peru/america.php")
     platformtools.play_video(item)
 
 
@@ -429,20 +431,29 @@ def provider_lw(url_channel, res):
     uu1 = httptools.downloadpage(url_channel, follow_redirects=False, only_headers=True, headers=headers).headers.get("location", "")
     uu = httptools.downloadpage(uu1, headers = headers).data
     url = "http://" + scrapertoolsV2.get_domain_from_url(uu1) + "/" + scrapertools.find_single_match(uu, 'location = "([^"]+)')
-    if url == "http://" or url == "http://tvcanales.cf/":
+    if url == "http://" or url == "http://tv.jaffmisshwedd.com/":
         data = httptools.downloadpage(url_channel, headers = headers).data
     else:
         data = httptools.downloadpage(url, headers = headers).data
     headers = {'Referer':url}
-    data_c = httptools.downloadpage("http://tvcanales.cf/jquery.js", headers = headers).data
+    data_c = httptools.downloadpage("http://tv.jaffmisshwedd.com/config-player.js", headers = headers).data
     key = scrapertools.find_single_match(data_c, "decode','slice','([^']+)")
     mm = scrapertools.find_single_match(data, 'MarioCSdecrypt.dec\("(.*?)"\)')
-    OpenSSL_AES = openssl_aes.AESCipher()
-    url1 = OpenSSL_AES.decrypt(mm, key)
-    dd = httptools.downloadpage(url1, headers = headers).data
-    url_f = scrapertools.find_single_match(dd, "(?s)%s.*?(http.*?)#" %res).strip()
-    if url_f == "":
-        url_f = url1
+    if mm:
+        OpenSSL_AES = openssl_aes.AESCipher()
+        url1 = OpenSSL_AES.decrypt(mm, key)
+        dd = httptools.downloadpage(url1, headers = headers).data
+        url_f = scrapertools.find_single_match(dd, "(?s)%s.*?(http.*?)#" %res).strip()
+        if url_f == "":
+            url_f = url1
+    else:
+        id = scrapertools.find_single_match(data, "<script type='text/javascript'> width.*?id='([^']+)'")
+        url = "https://player.limpi.tv/embed/%s" %id
+        data1 = httptools.downloadpage(url, headers=headers).data
+        loadbalance = httptools.downloadpage("https://www.limpi.tv/loadbalance").data
+        loadbalance = loadbalance.replace("\n","")
+        url_f = scrapertools.find_single_match(data1, '"file": "([^,]+)')
+        url_f = url_f.replace('" + loadbalance + "',loadbalance).replace('"','')
     url_f += "|User-Agent=%s" %_useragent
     url_f += "&Referer=%s" %url
     return url_f
@@ -452,8 +463,10 @@ def provider_vercanalestv(url_channel):
     logger.info()
     data = httptools.downloadpage(url_channel).data
     urlx = scrapertools.find_single_match(data, '<iframe scrolling="no".*?src="([^"]+)"')
+    if not urlx.startswith("http"):
+        urlx = "http://www.vercanalestv.com" + urlx
     headers = [
-    ["Referer", url_channel]
+    ["Referer", urlx]
     ]
     data = httptools.downloadpage(urlx, headers = headers).data
     url = scrapertools.find_single_match(data, '<a href="([^"]+)"')
@@ -499,6 +512,8 @@ def provider_verplusonline(url_channel):
     headers = [
     ["Referer", url_channel]
     ]
+    if not urlx.startswith("http"):
+        urlx = "http:" + urlx
     data = httptools.downloadpage(urlx, headers = headers).data
     bloque = scrapertools.find_single_match(data, "<script type='text.*?src=.*?</script>")
     if bloque:
@@ -607,9 +622,11 @@ def server_whostreams(url_channel):
 def server_telerium(url_channel):
     logger.info()
     data = httptools.downloadpage(url_channel).data
+    logger.info("Intel55 %s" %data)
     url_stream = scrapertools.find_single_match(data, '<iframe.*?src="([^"]+)"')
+    url_stream = "https://telerium.tv/embed/25812.html"
     headers = [
-    ["Referer", url_channel],
+    ["Referer", url_stream],
     ["Host", "telerium.tv"]
     ]
     data = httptools.downloadpage(url_stream, headers=headers).data
