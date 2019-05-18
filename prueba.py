@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # version 0.0.5
 # https://mundovideoshd.com/el-mariachi-capitulos/
+# https://notytech.com/2017/08/12/addons-kodi-alfa-vs-mitvspain-sucesor-pelisalacarta/
 
 import base64
 
