@@ -2,6 +2,7 @@
 
 import codecs
 from core import httptools
+from core import tmdb
 from core import scrapertools
 from core import servertools
 from core.item import Item
@@ -18,10 +19,15 @@ def mainlist(item):
     patron += '.*?<a href="([^"]+)'
     matches = scrapertools.find_multiple_matches(data, patron)
     for title, url in matches:
+        episode = scrapertools.find_single_match(title, 'tulo (\w+)')
         itemlist.append(Item(action = "play",
                              channel = item.channel,
+                             infoLabels = {"season": 1, "episode":episode},
+                             contentSerieName = "El Mariachi",
                              title = "El Mariachi - " + title,
                              url = url
                             ))
+    tmdb.set_infoLabels(itemlist)
     itemlist = servertools.get_servers_itemlist(itemlist)
+    scrapertools.printMatches(itemlist)
     return itemlist
