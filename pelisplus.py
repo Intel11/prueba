@@ -259,7 +259,7 @@ def findvideos(item):
             logger.info("Intel66 %s" %videos)
             url = videos["result"]
                 
-            if url in "player.php":
+            if u"player.php" in url:
                 data = httptools.downloadpage(url).data
                 url = scrapertools.find_single_match(data, "var url = '([^']+)'")
                 logger.info("Intel77 %s" %url)
