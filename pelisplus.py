@@ -63,7 +63,7 @@ def mainlist(item):
     itemlist = list()
 
     itemlist.append(Item(channel=item.channel, title="Peliculas", action="sub_menu", url_todas = "listado-peliculas", 
-                         url_populares = "peliculas-polulares",
+                         url_populares = "/tendencias/dia",
                          thumbnail=get_thumb('movies', auto=True)))
 
     itemlist.append(Item(channel=item.channel, title="Series", action="sub_menu", url_todas = "ver-series",
@@ -98,10 +98,10 @@ def sub_menu(item):
 
     if item.title.lower() == "peliculas":
         itemlist.append(Item(channel=item.channel, title="Ultimos populares", action="list_all",
-                            url=host + 'peliculas-populares',
+                            url=host + item.url_todas + item.url_populares,
                             thumbnail=get_thumb('more watched', auto=True), type=content))
         itemlist.append(Item(channel=item.channel, title="Peliculas estreno", action="list_all",
-                            url=host + 'estrenos',
+                            url=host + item.url_todas + '/estrenos',
                             thumbnail=get_thumb('more watched', auto=True), type=content))
         itemlist.append(Item(channel=item.channel, title="Generos", action="section",
                              thumbnail=get_thumb('genres', auto=True), type=content))
@@ -119,12 +119,10 @@ def list_all(item):
 
     data = httptools.downloadpage(item.url).data
     bloque = scrapertools.find_single_match(data, '(?is)card-body.*?Page navigation example')
-    logger.info("Intel111 %s" %bloque)
     patron  = '(?is)<a class="Posters-link" href="([^"]+).*?'
     patron += 'srcSet="([^"]+).*?'
     patron += '<p> <!-- -->([^<]+)'
     matches = scrapertools.find_multiple_matches(bloque, patron)
-    scrapertools.printMatches(matches)
 
     for url, thumb, title in matches:
         year = scrapertools.find_single_match(title, r"(\d{4})")
@@ -230,6 +228,8 @@ def section(item):
     logger.info()
     itemlist = list()
     data = httptools.downloadpage(host).data
+    bloque = scrapertools.find_single_match(data, "Generos(.*?)side-nav-header")
+    logger.info("Intel11 %s" %bloque)
     patron  = '(%scategory/[^"]+)' %host
     patron += '">([^<]+)'
     matches = scrapertools.find_multiple_matches(data, patron)
@@ -248,26 +248,18 @@ def findvideos(item):
     
     json = scrapertools.find_single_match(data.data, '(?is)type="application/json">(.*?)</script>')
     
-    #logger.info("Intel33 %s" %json)
-    
+   
     json1 = jsontools.load(json)["props"]["pageProps"]["thisMovie"]["videos"]
-    logger.info("Intel44 %s" %json1)
 
     for idioma in json1:
-        logger.info("Intel55 %s" %json1[idioma])
         for videos in json1[idioma]:
-            logger.info("Intel66 %s" %videos)
             url = videos["result"]
                 
             if u"player.php" in url:
                 data = httptools.downloadpage(url).data
                 url = scrapertools.find_single_match(data, "var url = '([^']+)'")
-                logger.info("Intel77 %s" %url)
             itemlist.append(Item(channel=item.channel, title='%s [%s]', url=url, action='play', language=idioma,
                 infoLabels=item.infoLabels))
-    
-    logger.info("Intel88")
-    scrapertools.printMatches(itemlist)
     
 
     itemlist = servertools.get_servers_itemlist(itemlist, lambda i: i.title % (i.server.capitalize(), i.language))
