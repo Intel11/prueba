@@ -66,7 +66,7 @@ def mainlist(item):
                          url_populares = "/tendencias/dia",
                          thumbnail=get_thumb('movies', auto=True)))
 
-    itemlist.append(Item(channel=item.channel, title="Series", action="sub_menu", url_todas = "ver-series",
+    itemlist.append(Item(channel=item.channel, title="Series", action="sub_menu", url_todas = "listado-series",
                          thumbnail=get_thumb('tvshows', auto=True)))
 
     itemlist.append(Item(channel=item.channel, title="Anime", action="sub_menu", url_todas ="ver-animes",
@@ -166,12 +166,12 @@ def seasons(item):
 
     itemlist = list()
     data = httptools.downloadpage(item.url).data
-    patron  = 'data-toggle="tab"[^>]*aria-controls="\d+"[^>]*>([^<]+)'
+    patron  = 'data-toggle="tab"[^>]*.?[^<]+<!-- -->([^<])+'
     infoLabels = item.infoLabels
     matches = scrapertools.find_multiple_matches(data, patron)
     
     for title in matches:
-        title = title.capitalize()
+        title = "Temporada " + title
         infoLabels["season"] = scrapertools.find_single_match(title, "Temporada (\d+)")
         itemlist.append(Item(channel=item.channel, title=title, url=item.url, action='episodesxseasons',
                              infoLabels=infoLabels, contentType='season'))
@@ -230,11 +230,11 @@ def section(item):
     data = httptools.downloadpage(host).data
     bloque = scrapertools.find_single_match(data, "Generos(.*?)side-nav-header")
     logger.info("Intel11 %s" %bloque)
-    patron  = '(%scategory/[^"]+)' %host
-    patron += '">([^<]+)'
-    matches = scrapertools.find_multiple_matches(data, patron)
+    patron  = '<a href="([^"]+)">'
+    patron += '([^<]+)'
+    matches = scrapertools.find_multiple_matches(bloque, patron)
     for url, title in matches:
-        itemlist.append(Item(channel=item.channel, url=url, title=title, action='list_all', type=item.type))
+        itemlist.append(Item(channel=item.channel, url=host + url, title=title, action='list_all', type=item.type))
 
     return itemlist
 
